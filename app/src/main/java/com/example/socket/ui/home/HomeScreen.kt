@@ -64,9 +64,7 @@ fun HomeScreen(
                 Text("Join")
             }
 
-            state.socketError?.let {
-                Text(it)
-            }
+            // TODO handle connection msg
         }
     }
 }
