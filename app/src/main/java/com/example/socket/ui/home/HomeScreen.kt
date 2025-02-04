@@ -17,8 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.socket.navigation.ChatScreenRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,8 +27,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
     LaunchedEffect(state.shouldLogin) {
+        navController.navigate(ChatScreenRoute)
     }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
