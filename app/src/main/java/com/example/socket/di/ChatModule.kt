@@ -1,7 +1,7 @@
 package com.example.socket.di
 
-import com.example.socket.data.ChatSessionRepositoryImpl
-import com.example.socket.domain.session.ChatSessionRepository
+import com.example.socket.data.SessionRepositoryImpl
+import com.example.socket.domain.session.SessionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,6 +13,6 @@ interface ChatModule {
 
     @Binds
     fun bindChatRepository(
-        chatRepositoryImpl: ChatSessionRepositoryImpl
-    ): ChatSessionRepository
+        chatRepositoryImpl: SessionRepositoryImpl
+    ): SessionRepository
 }

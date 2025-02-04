@@ -42,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -71,6 +72,7 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("io.socket:socket.io-client:2.1.1"){
         exclude(group = "org.json", module = "json")
     }

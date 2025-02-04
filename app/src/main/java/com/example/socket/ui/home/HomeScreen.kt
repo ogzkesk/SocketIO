@@ -3,6 +3,7 @@ package com.example.socket.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -15,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -28,8 +30,8 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state.shouldLogin) {
-        navController.navigate(ChatScreenRoute)
+    LaunchedEffect(state.join) {
+        if (state.join) navController.navigate(ChatScreenRoute)
     }
 
     Scaffold(
@@ -54,9 +56,16 @@ fun HomeScreen(
             )
 
             Button(
+                modifier = Modifier
+                    .fillMaxWidth(.4F)
+                    .padding(top = 16.dp),
                 onClick = viewModel::join
             ) {
                 Text("Join")
+            }
+
+            state.socketError?.let {
+                Text(it)
             }
         }
     }
