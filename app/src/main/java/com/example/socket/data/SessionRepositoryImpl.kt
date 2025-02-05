@@ -5,9 +5,8 @@ import com.example.socket.domain.session.SessionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
 
-class SessionRepositoryImpl @Inject constructor() : SessionRepository {
+class SessionRepositoryImpl : SessionRepository {
 
     private val userData = MutableStateFlow<User?>(null)
 

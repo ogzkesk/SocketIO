@@ -1,11 +1,17 @@
 package com.example.socket.domain.service
 
+import com.example.socket.domain.model.User
+import com.example.socket.domain.model.UserMessage
 import com.example.socket.domain.result.ConnectionStatus
-import com.example.socket.domain.result.ResultOf
-import kotlinx.coroutines.flow.Flow
 
 interface SocketService {
-    fun connect(result: (ConnectionStatus) -> Unit)
-    fun <T> send(event: String, data: T)
-    fun <T> get(event: String): Flow<ResultOf<T>>
+    fun connect()
+    fun disconnect()
+
+    fun join(user: User)
+    fun sendMessage(message: UserMessage)
+
+    fun streamConnectionStatus(callback: (ConnectionStatus) -> Unit)
+    fun streamUsers(callback: (List<User>) -> Unit)
+    fun streamMessages(callback: (List<UserMessage>) -> Unit)
 }

@@ -1,46 +1,72 @@
 package com.example.socket.network
 
+import com.example.socket.domain.ext.fromJson
+import com.example.socket.domain.ext.toJson
+import com.example.socket.domain.model.User
+import com.example.socket.domain.model.UserMessage
 import com.example.socket.domain.result.ConnectionStatus
-import com.example.socket.domain.result.ResultOf
 import com.example.socket.domain.service.SocketService
 import io.socket.client.Socket
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.json.JSONArray
 
-class SocketServiceImpl @Inject constructor(
+class SocketServiceImpl(
     private val socket: Socket,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : SocketService {
 
-    override fun connect(
-        result: (ConnectionStatus) -> Unit
-    ) {
-        socket.on(Socket.EVENT_CONNECT) {
-            result.invoke(ConnectionStatus.CONNECTED)
-            println("Connected to server ${it.toList()}")
-        }
-        socket.on(Socket.EVENT_CONNECT_ERROR) { args ->
-            result.invoke(ConnectionStatus.FAILURE)
-            println("Connection Error: ${args[0]}")
-        }
+    override fun connect() {
         socket.connect()
     }
 
-    override fun <T> send(event: String, data: T) {
-        socket.emit(event, data) // TODO response with ack
+    override fun disconnect() {
+        socket.disconnect()
     }
 
-    override fun <T> get(event: String): Flow<ResultOf<T>> {
-        return flow {
-            socket.on(event) { args ->
-                val value = args[0] as T
-                coroutineScope.launch {
-                    emit(ResultOf.Success(value))
+    override fun streamConnectionStatus(callback: (ConnectionStatus) -> Unit) {
+        socket.on(Socket.EVENT_CONNECT) {
+            callback.invoke(ConnectionStatus.CONNECTED)
+        }
+        socket.on(Socket.EVENT_CONNECT_ERROR) {
+            callback.invoke(ConnectionStatus.FAILURE)
+        }
+        socket.on(Socket.EVENT_DISCONNECT) {
+            callback.invoke(ConnectionStatus.DISCONNECTED)
+        }
+    }
+
+
+    override fun join(user: User) {
+        socket.emit("user", user.toJson())
+    }
+
+    override fun sendMessage(message: UserMessage) {
+        socket.emit("message", message.toJson())
+    }
+
+
+    override fun streamUsers(callback: (List<User>) -> Unit) {
+        socket.on("users") { args ->
+            if (!args.isNullOrEmpty()) {
+                val users = mutableListOf<User>()
+                val array = (args[0] as JSONArray)
+                for (index in 0..<array.length()) {
+                    users.add((array[index] as String).fromJson())
                 }
+                callback.invoke(users)
+            }
+        }
+    }
+
+
+    override fun streamMessages(callback: (List<UserMessage>) -> Unit) {
+        socket.on("messages") { args ->
+            println("args:: ${args.toList()}")
+            if (!args.isNullOrEmpty()) {
+                val messages = mutableListOf<UserMessage>()
+                val array = (args[0] as JSONArray)
+                for (index in 0..<array.length()) {
+                    messages.add((array[index] as String).fromJson())
+                }
+                callback.invoke(messages)
             }
         }
     }

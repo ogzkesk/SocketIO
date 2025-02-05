@@ -16,10 +16,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.example.socket.domain.result.ConnectionStatus
 import com.example.socket.navigation.ChatScreenRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +33,10 @@ fun HomeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.join) {
-        if (state.join) navController.navigate(ChatScreenRoute)
+        if (state.join) {
+            navController.navigate(ChatScreenRoute)
+            viewModel.updateState(state.copy(join = false))
+        }
     }
 
     Scaffold(
@@ -64,7 +69,21 @@ fun HomeScreen(
                 Text("Join")
             }
 
-            // TODO handle connection msg
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(.4F)
+                    .padding(top = 16.dp),
+                onClick = viewModel::disconnect
+            ) {
+                Text("Disconnect")
+            }
+
+            state.connectionStatus?.let {
+                Text(
+                    text = it.name,
+                    color = if (it == ConnectionStatus.CONNECTED) Color.Green else Color.Red
+                )
+            }
         }
     }
 }

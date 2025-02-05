@@ -52,6 +52,6 @@ object SocketModule {
     @Singleton
     fun provideSocket(
         options: IO.Options
-    ): Socket = IO.socket("https://socket-io-chat.glitch.me/", options)
+    ): Socket = IO.socket("ws://10.0.2.2:4000", options)
 
 }

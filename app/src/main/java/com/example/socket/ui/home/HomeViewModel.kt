@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,13 +23,25 @@ class HomeViewModel @Inject constructor(
     val state = mutableState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            socketService.connect { status ->
-                mutableState.update {
-                    it.copy(connectionStatus = status)
+        socketService.streamConnectionStatus { status ->
+            mutableState.update {
+                it.copy(connectionStatus = status)
+            }
+        }
+
+        socketService.streamUsers { users ->
+            viewModelScope.launch(Dispatchers.IO) {
+                sessionRepository.stream().collect { currentUser ->
+                    if (users.contains(currentUser)) {
+                        mutableState.update {
+                            it.copy(join = true)
+                        }
+                    }
                 }
             }
         }
+
+        socketService.connect()
     }
 
     fun userNameChanged(userName: String) {
@@ -39,18 +52,20 @@ class HomeViewModel @Inject constructor(
 
     fun join() {
         viewModelScope.launch(Dispatchers.IO) {
-            socketService.send("user", state.value.userNameText)
+            val user = User(
+                name = state.value.userNameText,
+                id = UUID.randomUUID().toString(),
+            )
+            socketService.join(user)
+            sessionRepository.setCurrentUser(user)
         }
     }
 
-    private fun setLocalUser() {
-        viewModelScope.launch {
-            val user = User(
-                id = "",
-                name = state.value.userNameText,
-                local = true
-            )
-            sessionRepository.setCurrentUser(user)
-        }
+    fun disconnect() {
+        socketService.disconnect()
+    }
+
+    fun updateState(newState: HomeState) {
+        mutableState.update { newState }
     }
 }
